@@ -1,0 +1,7 @@
+path: /home/slakter/coding/hits-rocks
+train: data/train 
+val: data/valid 
+task: segment
+nc: 1
+names: ['ROCK']
+workers: 6

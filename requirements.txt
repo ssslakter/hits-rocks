@@ -1,0 +1,5 @@
+opencv-python
+torchvision
+fastdownload
+fastprogress
+ultralytics
