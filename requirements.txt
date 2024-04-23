@@ -1,5 +1,7 @@
 opencv-python
 torchvision
+torch
 fastdownload
 fastprogress
 ultralytics
+fire
