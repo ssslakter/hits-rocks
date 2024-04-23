@@ -50,7 +50,9 @@ def segment_frame(frame, yolo):
     l.info('postprocessing done')
     return out, None
 
-### cli ###
+
+############ CLI ############
+
 def demo(video: str, track: bool = False, model_path: str='./models/yolo.pt'):
     yolo = YOLO(model_path, 'segment')
     l.info(f'model loaded from {model_path}')

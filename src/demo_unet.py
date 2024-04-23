@@ -38,7 +38,10 @@ def segment_frame(frame, model):
     out = proc.add_texts(out, texts, [(2,10), (2, 25)], 0.4)
     return out, stats[:,cv2.CC_STAT_AREA]
 
-### CLI ###
+
+
+############ CLI ############
+
 def demo(video: str, model_path: str = './models/unet.pt'):
     '''launch demo'''
     model = torch.load(model_path, map_location=default_device())
@@ -54,8 +57,7 @@ def train(data_path: str, save_path: str = './models/unet.pt', n_epoch=10):
         return x, TensorMask(y/255.)
 
     @Transform
-    def gamma_tfm(x: TensorImage|TensorImageBW, gamma=0.8):
-        return x**gamma
+    def gamma_tfm(x: TensorImage|TensorImageBW, gamma=0.8): return x**gamma
     
     dblock = DataBlock(blocks=(ImageBlock(PILImageBW), TransformBlock(batch_tfms=IntToFloatTensor())),
                    get_items=lambda p: get_image_files(p, folders=['valid','train']),

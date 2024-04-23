@@ -1,4 +1,4 @@
-opencv-python
+opencv-contrib-python
 torchvision
 torch
 fastdownload
