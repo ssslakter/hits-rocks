@@ -2,7 +2,7 @@ import cv2, torch, numpy as np, logging as l
 from fastai.vision.all import *
 from unet import UNet2DModel
 from processors import ImageProcessor, MaskProcessor
-from utils import init_logger
+from utils import init_logger, process_and_display
 import fire
 
 def read_yolo(file):
@@ -18,7 +18,8 @@ def create_mask(img_shape, labels):
     return res
 
 def segment_frame(frame, model):
-    area_ths, blob_scale, prob_ths, gamma, mask_prop = 0.1, 2, 0.5, 20, 0.5
+    ## MAIN CONFIGURATION
+    area_ths, blob_scale, prob_ths, gamma, mask_prop = AREA_THS, BLOB_SCALE, PROB_THS, GAMMA, MASK_PROP
     # encode and prepare
     proc = ImageProcessor()
     inp = proc.encode(frame)
@@ -35,31 +36,12 @@ def segment_frame(frame, model):
     out = proc.add_texts(out, stats[:,cv2.CC_STAT_AREA].round(2), centroids, 0.3)
     texts = [f'total: {len(stats)}', f'biggest: {str(round(stats[:,cv2.CC_STAT_AREA].max(),2))}']
     out = proc.add_texts(out, texts, [(2,10), (2, 25)], 0.4)
-    return out
-
-def process_and_display(file, func=None):
-    if func is None:  func = lambda x: x
-
-    video = cv2.VideoCapture(file)
-    try:
-        while True:
-            _, frame = video.read()
-            if frame is None: break
-            l.info('read frame')
-            out = func(frame)
-            l.info('processed frame')
-            cv2.imshow('frame', out)
-            if cv2.waitKey(1) == ord('q'): break
-    except KeyboardInterrupt:
-        print('Get keyboard interrupt')
-    finally:
-        video.release()
-
+    return out, stats[:,cv2.CC_STAT_AREA]
 
 ### CLI ###
 def demo(video: str, model_path: str = './models/unet.pt'):
     '''launch demo'''
-    model = torch.load(model_path)
+    model = torch.load(model_path, map_location=default_device())
     process_and_display(video, partial(segment_frame, model=model))
 
 
@@ -92,5 +74,7 @@ def train(data_path: str, save_path: str = './models/unet.pt', n_epoch=10):
     
 
 if __name__=='__main__':
+    ## CONFIG PARAMETERS, basically defaults are OK, but you can play around
+    AREA_THS, BLOB_SCALE, PROB_THS, GAMMA, MASK_PROP = 0.1, 2, 0.5, 20, 0.5
     init_logger()
     fire.Fire({'train': train, 'demo': demo})

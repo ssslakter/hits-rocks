@@ -4,7 +4,7 @@ import fire
 import numpy as np
 from ultralytics import YOLO
 import logging as l
-from utils import init_logger
+from utils import init_logger, process_and_display
 
 def extract_points(mask): return mask.xy[0].astype(np.int32)[None]
 
@@ -42,44 +42,22 @@ def add_area_labels(img, result):
                    1, (255, 0, 0), 2, cv2.LINE_AA) 
     return image
 
-
-def process_and_display(file, func=None):
-    if func is None:  func = lambda x: x
-
-    video = cv2.VideoCapture(file)
-    l.info(f'captured video from {file}')
-
-    try:
-        while True:
-            ret, frame = video.read()
-            if not ret: break
-            l.info('read frame')
-            out = func(frame)
-            l.info('processed frame')
-            cv2.imshow('frame', out)
-            if cv2.waitKey(1) == ord('q'): break
-    except KeyboardInterrupt:
-        l.warn('Get keyboard interrupt')
-    finally:
-        video.release()
-        cv2.destroyAllWindows()
-
-        
+       
 def segment_frame(frame, yolo): 
     res = yolo(frame, verbose=False)[0]
     l.info('model got predictions')
     out = add_area_labels(merge_with_mask(frame,get_mask(res)), res)
     l.info('postprocessing done')
-    return out
+    return out, None
 
 ### cli ###
-def demo(video: str, model_path: str='./models/yolo.pt'):
+def demo(video: str, track: bool = False, model_path: str='./models/yolo.pt'):
     yolo = YOLO(model_path, 'segment')
     l.info(f'model loaded from {model_path}')
-    func = partial(segment_frame, yolo=yolo)
+    func = (lambda f: (yolo.track(f, persist=True, verbose=False)[0].plot(), None)) if track else partial(segment_frame, yolo=yolo)
     process_and_display(video, func)
 
 if __name__=='__main__':
-    init_logger(logs_dir=None)
+    init_logger()
     l.info('started demo')
     fire.Fire(demo)
