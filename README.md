@@ -1,6 +1,8 @@
 # hits-rocks
 
-Real-time clod segmentation. This repo uses two models, yolo and U-net. Also there are wrappers for realtime segmentation in video stream.
+Real-time clod segmentation. This repo uses two models, YOLO and U-net. Also there are wrappers for realtime segmentation in video stream.
+
+<img src="./media/out.gif" alt="clods segmentation" width="500"/>
 
 Data used from [here](https://homeassistant.kotah.ru/local/clodding_train.avi)
 
@@ -15,6 +17,10 @@ pip install -r requirements.txt
 Use this command to run real-time segmentation of the video with clods
 ```sh
 python ./src/demo_yolo.py ./my_clods.avi  -m ./model.pt
+```
+for unet demo run
+```sh
+python ./src/demo_unet.py ./my_clods.avi  -m ./model.pt
 ```
 ## How to use CLI
 Since this script uses `cv2.imshow` it must be possible to display image somewhere, so if you are using WSL(like I do), then you won't be able to use it. To 
